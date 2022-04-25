@@ -48,7 +48,7 @@ def _isprime(m,iterations):
 
 def gen_keys(bit_length, confidence):
 	lower = pow(2, bit_length-1) #all bits of length (bitlength - 1) turned on
-	upper = pow(2, bit_length)- 1 #all bits turned on of a given bitlength
+	upper = pow(2, bit_length)- 1 #all bits turned on of a given bitlengt
 	while True:
 		p = random.randrange(lower,upper)
 		if _isprime(p,confidence):
@@ -88,9 +88,18 @@ def gen_keys(bit_length, confidence):
 		print(e,"*",d,"=",check)
 	return [n, p, q, phi, e, d]
 
-def decrypt(ciphertext,d,n):
-        return pow(int(ciphertext),int(d),int(n))
+def decrypt(ciphertext,d,n,salt_length):
+	salted_m = pow(int(ciphertext),int(d),int(n))
+	return salted_m >> salt_length
 
-def encrypt(message,e,n):
+def encrypt(message,e,n,salt_length):
+	lower = pow(2, salt_length-1)
+	upper = pow(2, salt_length)- 1
+	salt = random.randrange(lower,upper)
+
+	message = message << salt_length
+	message += salt
+
 	return pow(int(message),int(e),int(n))
+
 
