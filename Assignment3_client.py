@@ -3,7 +3,7 @@
 #Cryptography assignment 3
 
 #client side (client)
-import zmq
+import socket
 
 def encrypt(message):
     return message
@@ -11,25 +11,53 @@ def encrypt(message):
 def decrypt(message):
     return message
 
-context = zmq.Context()
+keys = 1
+bufsize = 1024
+# hostname = 127.0.0.1
 
-#  Socket to talk to server
-print("Connecting to server…")
-socket = context.socket(zmq.SUB)
-socket.setsockopt(zmq.SUBSCRIBE) #is this needed 
-socket.connect("tcp://localhost:5555")
+sct=socket.socket(socket.AF_INET, socket.SOCK_STREAM) #creating the socket
+sct.connect(("127.0.0.1", 9999)) 
 
-keys = 1, 2
+sct.send(bytes(keys))
 
-socket.send(keys)
 while True:
+    #sct.recv(1024).decode()
     sendMessage = input()
-    sendMessage = encrypt(sendMessage)
-    socket.send("%s", sendMessage)
-
-    recvMessage = socket.recv()
-    print(decrypt(recvMessage))
+    sct.send(bytes(encrypt(sendMessage),'utf-8')) #sending the TCP message
     
+    recvMessage = sct.recv(bufsize)
+    print(decrypt(recvMessage))
+sct.close()
+
+
+######################################################################3
+# import zmq
+
+# def encrypt(message):
+#     return message
+
+# def decrypt(message):
+#     return message
+
+# context = zmq.Context()
+
+# #  Socket to talk to server
+# print("Connecting to server…")
+# socket = context.socket(zmq.SUB)
+# socket.setsockopt(zmq.SUBSCRIBE) #is this needed 
+# socket.connect("tcp://localhost:5555")
+
+# keys = 1, 2
+
+# socket.send(keys)
+# while True:
+#     sendMessage = input()
+#     sendMessage = encrypt(sendMessage)
+#     socket.send("%s", sendMessage)
+
+#     recvMessage = socket.recv()
+#     print(decrypt(recvMessage))
+
 
 
 # for request in range(10):
