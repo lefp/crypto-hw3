@@ -1,5 +1,7 @@
 #Creating an RSA setup
 
+_BYTE_ORDER = "big" # chosen arbitrarily
+
 import random
 from math import ceil, sqrt, floor
 #returns [d, x, y] for a >= b where d = gcd(a,b) = ax + by
@@ -94,11 +96,11 @@ def gen_keys(bit_length, confidence=None):
 		print(e,"*",d,"=",check)
 	return {"n": n, "p": p, "q": q, "phi": phi, "e": e, "d": d}
 
-def decrypt(ciphertext,d,n,salt_length):
+def decrypt_int(ciphertext: int,d,n,salt_length) -> int:
 	salted_m = pow(int(ciphertext),int(d),int(n))
 	return salted_m >> salt_length
 
-def encrypt(message,e,n,salt_length):
+def encrypt_int(message: int,e,n,salt_length) -> int:
 	lower = pow(2, salt_length-1)
 	upper = pow(2, salt_length)- 1
 	salt = random.randrange(lower,upper)
@@ -115,4 +117,10 @@ def encrypt(message,e,n,salt_length):
 
 	return pow(int(message),int(e),int(n))
 
+def encrypt_bytes(message: bytes,e,n,salt_length) -> bytes:
+	message_int = int.from_bytes(message, _BYTE_ORDER)
+	return encrypt_int(message_int,e,n,salt_length).to_bytes(len(message), _BYTE_ORDER)
 
+def decrypt_bytes(ciphertext: bytes,d,n,salt_length) -> bytes:
+	ciphertext_int = int.from_bytes(ciphertext, _BYTE_ORDER)
+	return decrypt_int(ciphertext_int,d,n,salt_length).to_bytes(len(ciphertext), _BYTE_ORDER)
