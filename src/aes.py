@@ -8,11 +8,11 @@ from math import ceil
 from os import urandom
 
 KEY_SIZES_BITS = {128, 192, 256} # AES might also support 512, but not with CFB
-_BYTE_ORDER = 'big' # big endian. Chosen arbitrarily
+BYTE_ORDER = 'big' # big endian. Chosen arbitrarily
 
 def _generate_key(size: int) -> bytes:
     if size not in KEY_SIZES_BITS: raise ValueError(f"Invalid key size. Must be in {KEY_SIZES_BITS}")
-    return getrandbits(size).to_bytes(ceil(size / 8), _BYTE_ORDER)
+    return getrandbits(size).to_bytes(ceil(size / 8), BYTE_ORDER)
 
 def _generate_seed() -> bytes:
     return urandom(_ALGORITHM.block_size // 8)
