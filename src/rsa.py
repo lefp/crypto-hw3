@@ -1,9 +1,6 @@
 #Creating an RSA setup
 
-_BYTE_ORDER = "big" # chosen arbitrarily
-
 import random
-from math import ceil, sqrt, floor
 #returns [d, x, y] for a >= b where d = gcd(a,b) = ax + by
 def _pulverizer(a,b):
 	x1 = 1
@@ -53,10 +50,10 @@ def gen_keys(bit_length, confidence=None):
 	# confidence is the number of iterations for the Miller-Rabin test
 	if confidence is None: confidence = 100
 
-	n_lower = pow(2, bit_length-1) #all bits of length (bitlength - 1) turned on
-	n_upper = pow(2, bit_length)- 1 #all bits turned on of a given bitlengt
-	lower = ceil(sqrt(n_lower))
-	upper = floor(sqrt(n_upper))
+	# bit lengths of p and q are half the bit length of n
+	if bit_length % 2 != 0: raise ValueError("Bit length must be even")
+	lower = pow(2, bit_length // 2 - 1) # 0b1000...0000
+	upper = pow(2, bit_length // 2) - 1 # 0b1111...1111
 	while True:
 		p = random.randrange(lower,upper)
 		if _isprime(p,confidence):
@@ -96,11 +93,11 @@ def gen_keys(bit_length, confidence=None):
 		print(e,"*",d,"=",check)
 	return {"n": n, "p": p, "q": q, "phi": phi, "e": e, "d": d}
 
-def decrypt_int(ciphertext: int,d,n,salt_length) -> int:
+def decrypt(ciphertext: int,d,n,salt_length) -> int:
 	salted_m = pow(int(ciphertext),int(d),int(n))
 	return salted_m >> salt_length
 
-def encrypt_int(message: int,e,n,salt_length) -> int:
+def encrypt(message: int,e,n,salt_length) -> int:
 	lower = pow(2, salt_length-1)
 	upper = pow(2, salt_length)- 1
 	salt = random.randrange(lower,upper)
@@ -116,11 +113,3 @@ def encrypt_int(message: int,e,n,salt_length) -> int:
 		raise RuntimeError("Salted message too large")
 
 	return pow(int(message),int(e),int(n))
-
-def encrypt_bytes(message: bytes,e,n,salt_length) -> bytes:
-	message_int = int.from_bytes(message, _BYTE_ORDER)
-	return encrypt_int(message_int,e,n,salt_length).to_bytes(len(message), _BYTE_ORDER)
-
-def decrypt_bytes(ciphertext: bytes,d,n,salt_length) -> bytes:
-	ciphertext_int = int.from_bytes(ciphertext, _BYTE_ORDER)
-	return decrypt_int(ciphertext_int,d,n,salt_length).to_bytes(len(ciphertext), _BYTE_ORDER)
