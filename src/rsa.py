@@ -1,6 +1,7 @@
 #Creating an RSA setup
 
 import random
+from math import ceil, sqrt, floor
 #returns [d, x, y] for a >= b where d = gcd(a,b) = ax + by
 def _pulverizer(a,b):
 	x1 = 1
@@ -47,8 +48,10 @@ def _isprime(m,iterations):
 	return True
 
 def gen_keys(bit_length, confidence):
-	lower = pow(2, bit_length-1) #all bits of length (bitlength - 1) turned on
-	upper = pow(2, bit_length)- 1 #all bits turned on of a given bitlengt
+	n_lower = pow(2, bit_length-1) #all bits of length (bitlength - 1) turned on
+	n_upper = pow(2, bit_length)- 1 #all bits turned on of a given bitlengt
+	lower = ceil(sqrt(n_lower))
+	upper = floor(sqrt(n_upper))
 	while True:
 		p = random.randrange(lower,upper)
 		if _isprime(p,confidence):
@@ -86,7 +89,7 @@ def gen_keys(bit_length, confidence):
 	else:
 		print("Sanity check:you are insane")
 		print(e,"*",d,"=",check)
-	return [n, p, q, phi, e, d]
+	return {"n": n, "p": p, "q": q, "phi": phi, "e": e, "d": d}
 
 def decrypt(ciphertext,d,n,salt_length):
 	salted_m = pow(int(ciphertext),int(d),int(n))
