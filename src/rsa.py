@@ -46,9 +46,14 @@ def _isprime(m,iterations):
 		iterations -= 1
 	return True
 
-def gen_keys(bit_length, confidence):
-	lower = pow(2, bit_length-1) #all bits of length (bitlength - 1) turned on
-	upper = pow(2, bit_length)- 1 #all bits turned on of a given bitlengt
+def gen_keys(bit_length, confidence=None):
+	# confidence is the number of iterations for the Miller-Rabin test
+	if confidence is None: confidence = 100
+
+	# bit lengths of p and q are half the bit length of n
+	if bit_length % 2 != 0: raise ValueError("Bit length must be even")
+	lower = pow(2, bit_length // 2 - 1) # 0b1000...0000
+	upper = pow(2, bit_length // 2) - 1 # 0b1111...1111
 	while True:
 		p = random.randrange(lower,upper)
 		if _isprime(p,confidence):
@@ -86,20 +91,25 @@ def gen_keys(bit_length, confidence):
 	else:
 		print("Sanity check:you are insane")
 		print(e,"*",d,"=",check)
-	return [n, p, q, phi, e, d]
+	return {"n": n, "p": p, "q": q, "phi": phi, "e": e, "d": d}
 
-def decrypt(ciphertext,d,n,salt_length):
+def decrypt(ciphertext: int,d,n,salt_length) -> int:
 	salted_m = pow(int(ciphertext),int(d),int(n))
 	return salted_m >> salt_length
 
-def encrypt(message,e,n,salt_length):
+def encrypt(message: int,e,n,salt_length) -> int:
 	lower = pow(2, salt_length-1)
 	upper = pow(2, salt_length)- 1
 	salt = random.randrange(lower,upper)
 
 	message = message << salt_length
 	message += salt
+	# We haven't implemented a mechanism to guarantee that the salted message is less than n. For this program
+	# it should be fine, since the AES key and seed together are probably under 1024, so we'll just enforce a
+	# minimum of 1024 bits for RSA (which is the standard minimum anyway; 512 is insecure). If one of y'all
+	# wants to fix this so that it's less jank, feel free, but I don't think it's worth the effort for this
+	# assignment.
+	if message >= n:
+		raise RuntimeError("Salted message too large")
 
 	return pow(int(message),int(e),int(n))
-
-
