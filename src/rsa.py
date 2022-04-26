@@ -47,7 +47,10 @@ def _isprime(m,iterations):
 		iterations -= 1
 	return True
 
-def gen_keys(bit_length, confidence):
+def gen_keys(bit_length, confidence=None):
+	# confidence is the number of iterations for the Miller-Rabin test
+	if confidence is None: confidence = 100
+
 	n_lower = pow(2, bit_length-1) #all bits of length (bitlength - 1) turned on
 	n_upper = pow(2, bit_length)- 1 #all bits turned on of a given bitlengt
 	lower = ceil(sqrt(n_lower))
