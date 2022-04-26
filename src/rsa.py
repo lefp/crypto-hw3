@@ -1,6 +1,8 @@
 #Creating an RSA setup
-
 import random
+
+_SANITY_CHECKS = False
+
 #returns [d, x, y] for a >= b where d = gcd(a,b) = ax + by
 def _pulverizer(a,b):
 	x1 = 1
@@ -63,14 +65,14 @@ def gen_keys(bit_length, confidence=None):
 		if _isprime(q,confidence) and q != p:
 			break
 
-	print("p = ", p)
-	print("q = ", q)
+	if _SANITY_CHECKS: print("p = ", p)
+	if _SANITY_CHECKS: print("q = ", q)
 
 	n = p*q
 	phi = (p-1)*(q-1)
 
-	print("n = ",n)
-	print("phi = ",phi)
+	if _SANITY_CHECKS: print("n = ",n)
+	if _SANITY_CHECKS: print("phi = ",phi)
 
 	e = 3
 	result = _pulverizer(phi,e)
@@ -81,16 +83,16 @@ def gen_keys(bit_length, confidence=None):
 	while d < 0:
 		d += phi
 
-	print("e = ", e)
-	print("d = ", d)
+	if _SANITY_CHECKS: print("e = ", e)
+	if _SANITY_CHECKS: print("d = ", d)
 
 	check = pow(e*d,1,phi)
 	if check == 1:
-		print("Passed sanity check")
-		print(e,"*",d,"=",check)
+		if _SANITY_CHECKS: print("Passed sanity check")
+		if _SANITY_CHECKS: print(e,"*",d,"=",check)
 	else:
-		print("Sanity check:you are insane")
-		print(e,"*",d,"=",check)
+		if _SANITY_CHECKS: print("Sanity check:you are insane")
+		if _SANITY_CHECKS: print(e,"*",d,"=",check)
 	return {"n": n, "p": p, "q": q, "phi": phi, "e": e, "d": d}
 
 def decrypt(ciphertext: int,d,n,salt_length) -> int:
