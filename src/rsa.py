@@ -105,6 +105,13 @@ def encrypt(message,e,n,salt_length):
 
 	message = message << salt_length
 	message += salt
+	# We haven't implemented a mechanism to guarantee that the salted message is less than n. For this program
+	# it should be fine, since the AES key and seed together are probably under 1024, so we'll just enforce a
+	# minimum of 1024 bits for RSA (which is the standard minimum anyway; 512 is insecure). If one of y'all
+	# wants to fix this so that it's less jank, feel free, but I don't think it's worth the effort for this
+	# assignment.
+	if message >= n:
+		raise RuntimeError("Salted message too large")
 
 	return pow(int(message),int(e),int(n))
 
