@@ -3,6 +3,9 @@ import random
 
 _SANITY_CHECKS = False
 
+_BYTE_ORDER = "big" # endian
+_DEFAULT_SALT_LEN = 8 # abitrarily chosen
+
 #returns [d, x, y] for a >= b where d = gcd(a,b) = ax + by
 def _pulverizer(a,b):
 	x1 = 1
@@ -95,11 +98,11 @@ def gen_keys(bit_length, confidence=None):
 		if _SANITY_CHECKS: print(e,"*",d,"=",check)
 	return {"n": n, "p": p, "q": q, "phi": phi, "e": e, "d": d}
 
-def decrypt(ciphertext: int,d,n,salt_length) -> int:
+def decrypt_int(ciphertext: int,d,n,salt_length) -> int:
 	salted_m = pow(int(ciphertext),int(d),int(n))
 	return salted_m >> salt_length
 
-def encrypt(message: int,e,n,salt_length) -> int:
+def encrypt_int(message: int,e,n,salt_length) -> int:
 	lower = pow(2, salt_length-1)
 	upper = pow(2, salt_length)- 1
 	salt = random.randrange(lower,upper)
@@ -115,3 +118,9 @@ def encrypt(message: int,e,n,salt_length) -> int:
 		raise RuntimeError("Salted message too large")
 
 	return pow(int(message),int(e),int(n))
+
+def encrypt_from_bytes(message: bytes, pub_keys: dict, salt_len=_DEFAULT_SALT_LEN) -> int:
+	return encrypt_int(int.from_bytes(message, _BYTE_ORDER), pub_keys["e"], pub_keys["n"], salt_len)
+
+def decrypt_to_bytes(ciphertext: int, keys: dict, message_len: int, salt_len=_DEFAULT_SALT_LEN) -> bytes:
+	return decrypt_int(ciphertext, keys["d"], keys["n"], salt_len).to_bytes(message_len, _BYTE_ORDER)

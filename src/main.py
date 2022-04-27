@@ -1,7 +1,6 @@
 import aes
 import rsa
 
-RSA_SALT_BITS = 8 # chosen arbitrarily
 RSA_KEY_SIZES = {1024, 2048, 4096}
 
 def input_aes_key_size_bits():
@@ -46,18 +45,8 @@ if __name__ == "__main__":
     # TODO receive RSA public keys via sockets
 
     # send AES keys
-    crypted_aes_key  = rsa.encrypt(
-        int.from_bytes(aes_cryptor_bob.key(), aes.BYTE_ORDER),
-        e=rsa_pub_keys["e"],
-        n=rsa_pub_keys["n"],
-        salt_length=RSA_SALT_BITS
-    )
-    crypted_aes_seed = rsa.encrypt(
-        int.from_bytes(aes_cryptor_bob.seed(), aes.BYTE_ORDER),
-        e=rsa_pub_keys["e"],
-        n=rsa_pub_keys["n"],
-        salt_length=RSA_SALT_BITS
-    )
+    crypted_aes_key  = rsa.encrypt_from_bytes(aes_cryptor_bob.key(),  rsa_pub_keys)
+    crypted_aes_seed = rsa.encrypt_from_bytes(aes_cryptor_bob.seed(), rsa_pub_keys)
     aes_key_size_bytes = len(aes_cryptor_bob.key())
     aes_seed_size_bytes = len(aes_cryptor_bob.seed())
     # TODO send AES key, seed, key size, and seed size via sockets
@@ -66,18 +55,8 @@ if __name__ == "__main__":
 
     # receive AES keys
     # TODO receive AES keys via sockets
-    aes_key  = rsa.decrypt(
-        crypted_aes_key,
-        d=rsa_keys["d"],
-        n=rsa_keys["n"],
-        salt_length=RSA_SALT_BITS
-    ).to_bytes(aes_key_size_bytes, aes.BYTE_ORDER)
-    aes_seed = rsa.decrypt(
-        crypted_aes_seed,
-        d=rsa_keys["d"],
-        n=rsa_keys["n"],
-        salt_length=RSA_SALT_BITS
-    ).to_bytes(aes_seed_size_bytes, aes.BYTE_ORDER)
+    aes_key  = rsa.decrypt_to_bytes(crypted_aes_key,  rsa_keys, aes_key_size_bytes )
+    aes_seed = rsa.decrypt_to_bytes(crypted_aes_seed, rsa_keys, aes_seed_size_bytes)
     aes_cryptor_alice = aes.Cryptor(aes_key, aes_seed)
 
     # CHAT TEST ---------------------------------------------------------------
