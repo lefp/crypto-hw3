@@ -27,12 +27,12 @@ client,add=sct.accept()
 keys = client.recv(bufsize)
 
 while True: #probably have some sort of break later
-    recvMessage = sct.recv(bufsize)
+    recvMessage = client.recv(bufsize)
     print(decrypt(recvMessage))
 
     #time.sleep(1)
     sendMessage = input()
-    sct.send(bytes(sendMessage,'utf-8'))
+    client.send(bytes(sendMessage,'utf-8'))
 sct.close()#will have to place when to do this later
 
 
