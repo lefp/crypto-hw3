@@ -1,7 +1,7 @@
 import aes
 import rsa
 
-RSA_KEY_SIZES = {1024, 2048, 4096}
+RSA_MOD_SIZES_BITS = {1024, 2048, 4096}
 
 def input_aes_key_size_bits():
     key_size_str = input(f"AES key size ({aes.KEY_SIZES_BITS}): ")
@@ -17,9 +17,18 @@ def input_aes_key_size_bits():
         key_size_str = input("Try again: ")
 
 def input_rsa_mod_size_bits():
-    # TODO implement
-    # TODO include a check to ensure it's in RSA_KEY_SIZES
-    return 4096 # temporary, remove this line when implementing this function
+    mod_size_str = input(f"RSA mod size ({RSA_MOD_SIZES_BITS}): ")
+    while True:
+        try:
+            mod_size = int(mod_size_str)
+            if mod_size in RSA_MOD_SIZES_BITS:
+                return mod_size
+            else:
+                print(f"Error: mod size must be in {RSA_MOD_SIZES_BITS}")
+        except ValueError:
+            print("Invalid mod size. Must be an integer")
+        mod_size_str = input("Try again: ")
+
 
 # this is a local test. We don't have a 2-party socket setup
 if __name__ == "__main__":
