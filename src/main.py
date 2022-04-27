@@ -19,7 +19,7 @@ def input_aes_key_size_bits():
 def input_rsa_mod_size_bits():
     # TODO implement
     # TODO include a check to ensure it's in RSA_KEY_SIZES
-    return 1024 # temporary, remove this line when implementing this function
+    return 4096 # temporary, remove this line when implementing this function
 
 # this is a local test. We don't have a 2-party socket setup
 if __name__ == "__main__":

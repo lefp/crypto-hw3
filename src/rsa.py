@@ -46,7 +46,7 @@ def _special_expmod(a,b,m):
 def _isprime(m,iterations):
 	while iterations > 0:
 		k = random.randrange(1,m)
-		if _special_expmod(k,m,m) != k:
+		if pow(k,m,m) != k:
 			return False
 		iterations -= 1
 	return True
