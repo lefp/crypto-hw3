@@ -1,0 +1,4 @@
+The chat partners are a client and a server.
+The server must be started before the client.
+The server and client must take turns sending one message at a time.
+Use CTRL-C on any side to exit.

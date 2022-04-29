@@ -3,84 +3,65 @@
 #Cryptography assignment 3
 
 #client side (client)
+
 import socket
+from pickle import loads as deserialize, dumps as serialize
+import rsa
+import aes
 
-def encrypt(message):
-    return message
+RSA_MOD_SIZES_BITS = {1024, 2048, 4096}
+SOCKET_BUFSIZE_BYTES = 2048
 
-def decrypt(message):
-    return message
+def input_rsa_mod_size_bits():
+    mod_size_str = input(f"RSA mod size ({RSA_MOD_SIZES_BITS}): ")
+    while True:
+        try:
+            mod_size = int(mod_size_str)
+            if mod_size in RSA_MOD_SIZES_BITS:
+                return mod_size
+            else:
+                print(f"Error: mod size must be in {RSA_MOD_SIZES_BITS}")
+        except ValueError:
+            print("Invalid mod size. Must be an integer")
+        mod_size_str = input("Try again: ")
 
-keys = 1
-bufsize = 1024
-# hostname = 127.0.0.1
+if __name__ == "__main__":
+    # generate rsa keys
+    rsa_mod_size_bits = input_rsa_mod_size_bits()
+    print("Generating RSA keys...")
+    rsa_keys = rsa.gen_keys(rsa_mod_size_bits)
+    rsa_pub_keys = {"n": rsa_keys["n"], "e": rsa_keys["e"]}
 
-sct=socket.socket(socket.AF_INET, socket.SOCK_STREAM) #creating the socket
-sct.connect(("127.0.0.1", 9999)) 
+    # set up socket
+    print("Connecting to chat partner...")
+    sct = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sct.connect(("127.0.0.1", 9999))
+    print("Connected")
 
-sct.send(bytes(keys))
+    try:
+        # send rsa public keys
+        sct.send(serialize(rsa_pub_keys))
 
-while True:
-    #sct.recv(1024).decode()
-    sendMessage = input()
-    sct.send(bytes(encrypt(sendMessage),'utf-8')) #sending the TCP message
-    
-    recvMessage = sct.recv(bufsize)
-    print(decrypt(recvMessage))
-sct.close()
+        # receive and decrypt aes keys
+        # we expect aes_info to be a dict({'crypted_key', 'key_size_bytes', 'crypted_seed', 'seed_size_bytes'})
+        aes_info = deserialize(sct.recv(SOCKET_BUFSIZE_BYTES))
+        aes_key = rsa.decrypt_to_bytes(aes_info["crypted_key"], rsa_keys, aes_info["key_size_bytes"])
+        aes_seed = rsa.decrypt_to_bytes(aes_info["crypted_seed"], rsa_keys, aes_info["seed_size_bytes"])
 
+        # set up aes cryptor
+        aes_cryptor = aes.Cryptor(aes_key, aes_seed)
 
-######################################################################3
-# import zmq
-
-# def encrypt(message):
-#     return message
-
-# def decrypt(message):
-#     return message
-
-# context = zmq.Context()
-
-# #  Socket to talk to server
-# print("Connecting to server…")
-# socket = context.socket(zmq.SUB)
-# socket.setsockopt(zmq.SUBSCRIBE) #is this needed 
-# socket.connect("tcp://localhost:5555")
-
-# keys = 1, 2
-
-# socket.send(keys)
-# while True:
-#     sendMessage = input()
-#     sendMessage = encrypt(sendMessage)
-#     socket.send("%s", sendMessage)
-
-#     recvMessage = socket.recv()
-#     print(decrypt(recvMessage))
-
-
-
-# for request in range(10):
-#     print("Sending request %s …" % request)
-#     socket.send(b"Hello")
-
-#     message = socket.recv()
-#     print("Received reply %s [ %s ]" % (request, message))
-
-
-
-
-# import socket
-
-# s = socket.socket()
-  
-# port = 40674
-  
-# # connect to the server on local computer
-# s.connect(('127.0.0.1', port))
-  
-# # receive data from the server
-# print(s.recv(1024))
-  
-# # close the connection
-# s.close()
+        # start chatting
+        while True:
+            send_message = bytes(input("> "), "utf-8")
+            sct.send(aes_cryptor.encrypt(send_message))
+            
+            recv_message = sct.recv(SOCKET_BUFSIZE_BYTES)
+            if recv_message == b"":
+                print("Chat partner disconnected")
+                break
+            else: print("Chat partner: " + aes_cryptor.decrypt(recv_message).decode())
+        sct.close()
+    except KeyboardInterrupt:
+        sct.close()
+        exit()
