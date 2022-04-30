@@ -9,6 +9,7 @@ from pickle import loads as deserialize, dumps as serialize
 import rsa
 import aes
 from chat import chat
+from termcolor import cprint
 
 SOCKET_BUFSIZE_BYTES = 2048
 PORT = 9999
@@ -41,7 +42,7 @@ if __name__ == "__main__":
     print("Waiting for chat partner to connect...")
     sct.listen()
     client, add = sct.accept()
-    print("Connected")
+    cprint("Connected", "green", attrs=["bold"])
 
     try:
         # receive rsa public keys
