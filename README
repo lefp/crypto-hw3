@@ -4,5 +4,4 @@ To run:
     `python3 client.py` (in a different terminal)
 The server must be started before the client.
 
-The server and client must take turns sending one message at a time.
 Use CTRL-C on any side to exit.
