@@ -10,6 +10,7 @@ import rsa
 import aes
 
 SOCKET_BUFSIZE_BYTES = 2048
+PORT = 9999
 
 def input_aes_key_size_bits():
     key_size_str = input(f"AES key size ({aes.KEY_SIZES_BITS}): ")
@@ -34,7 +35,7 @@ if __name__ == "__main__":
     # to prevent "Address already in use" error, which occurs if the connection is closed by the server
     # instead of the client, and then the server tries to reconnect
     sct.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    sct.bind(("127.0.0.1", 9999))
+    sct.bind(("", PORT))
     # wait for client to connect
     print("Waiting for chat partner to connect...")
     sct.listen()

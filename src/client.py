@@ -11,6 +11,7 @@ import aes
 
 RSA_MOD_SIZES_BITS = {1024, 2048, 4096}
 SOCKET_BUFSIZE_BYTES = 2048
+PORT = 9999
 
 def input_rsa_mod_size_bits():
     mod_size_str = input(f"RSA mod size ({RSA_MOD_SIZES_BITS}): ")
@@ -33,9 +34,10 @@ if __name__ == "__main__":
     rsa_pub_keys = {"n": rsa_keys["n"], "e": rsa_keys["e"]}
 
     # set up socket
-    print("Connecting to chat partner...")
+    server_addr = input("Chat partner address: ")
+    print("Connecting...")
     sct = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sct.connect(("127.0.0.1", 9999))
+    sct.connect((server_addr, PORT))
     print("Connected")
 
     try:
