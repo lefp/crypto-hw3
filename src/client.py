@@ -8,6 +8,7 @@ import socket
 from pickle import loads as deserialize, dumps as serialize
 import rsa
 import aes
+from chat import chat
 
 RSA_MOD_SIZES_BITS = {1024, 2048, 4096}
 SOCKET_BUFSIZE_BYTES = 2048
@@ -34,10 +35,15 @@ if __name__ == "__main__":
     rsa_pub_keys = {"n": rsa_keys["n"], "e": rsa_keys["e"]}
 
     # set up socket
-    server_addr = input("Chat partner address: ")
-    print("Connecting...")
-    sct = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sct.connect((server_addr, PORT))
+    while True:
+        try:
+            server_addr = input("Chat partner address: ")
+            print("Connecting...")
+            sct = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sct.connect((server_addr, PORT))
+            break
+        except socket.gaierror:
+            print("Error: failed to resolve address")
     print("Connected")
 
     try:
@@ -54,16 +60,7 @@ if __name__ == "__main__":
         aes_cryptor = aes.Cryptor(aes_key, aes_seed)
 
         # start chatting
-        while True:
-            send_message = bytes(input("> "), "utf-8")
-            sct.send(aes_cryptor.encrypt(send_message))
-            
-            recv_message = sct.recv(SOCKET_BUFSIZE_BYTES)
-            if recv_message == b"":
-                print("Chat partner disconnected")
-                break
-            else: print("Chat partner: " + aes_cryptor.decrypt(recv_message).decode())
-        sct.close()
+        chat(sct, SOCKET_BUFSIZE_BYTES, aes_cryptor)
     except KeyboardInterrupt:
         sct.close()
         exit()

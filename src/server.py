@@ -8,6 +8,7 @@ import socket
 from pickle import loads as deserialize, dumps as serialize
 import rsa
 import aes
+from chat import chat
 
 SOCKET_BUFSIZE_BYTES = 2048
 PORT = 9999
@@ -56,16 +57,7 @@ if __name__ == "__main__":
         client.send(serialize(aes_info))
 
         # start chatting
-        while True:
-            recv_message = client.recv(SOCKET_BUFSIZE_BYTES)
-            if recv_message == b"":
-                print("Chat partner disconnected")
-                break
-            else: print("Chat partner: " + aes_cryptor.decrypt(recv_message).decode())
-
-            send_message = bytes(input("> "),"utf-8")
-            client.send(aes_cryptor.encrypt(send_message))
-        sct.close()
+        chat(client, SOCKET_BUFSIZE_BYTES, aes_cryptor)
     except KeyboardInterrupt:
         sct.close()
         exit()
