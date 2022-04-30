@@ -1,6 +1,7 @@
 from socket import socket
 from aes import Cryptor
 from threading import Thread
+from termcolor import cprint
 
 class Disconnect:
     def __init__(self, disconnect: bool):
@@ -14,7 +15,7 @@ def _send_messages(sct: socket, cryptor: Cryptor, dc: Disconnect):
             sct.send(cryptor.encrypt(send_message))
     except KeyboardInterrupt:
         dc.disconnect = True
-        print("Disconnecting...")
+        cprint("Disconnecting...", "red", attrs=["bold"])
         return
 
 def _recv_messages(sct: socket, sct_bufsize_bytes: int, cryptor: Cryptor, dc: Disconnect):
@@ -22,9 +23,9 @@ def _recv_messages(sct: socket, sct_bufsize_bytes: int, cryptor: Cryptor, dc: Di
         recv_message = sct.recv(sct_bufsize_bytes)
         if recv_message == b"":
             dc.disconnect = True
-            print("Chat partner disconnected")
+            cprint("Chat partner disconnected", "red", attrs=["bold"])
             return
-        else: print("Chat partner: " + cryptor.decrypt(recv_message).decode())
+        else: cprint("Chat partner: " + cryptor.decrypt(recv_message).decode(), "yellow")
 
 def chat(sct: socket, sct_bufsize_bytes: int, cryptor: Cryptor):
     # passing an object allows the threads to access the inner value by reference

@@ -9,6 +9,7 @@ from pickle import loads as deserialize, dumps as serialize
 import rsa
 import aes
 from chat import chat
+from termcolor import cprint
 
 RSA_MOD_SIZES_BITS = {1024, 2048, 4096}
 SOCKET_BUFSIZE_BYTES = 2048
@@ -44,7 +45,7 @@ if __name__ == "__main__":
             break
         except socket.gaierror:
             print("Error: failed to resolve address")
-    print("Connected")
+    cprint("Connected", "green", attrs=["bold"])
 
     try:
         # send rsa public keys
