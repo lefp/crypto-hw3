@@ -1,7 +1,8 @@
 The chat partners are a client and a server.
 To run:
     `python3 server.py`
-    `python3 client.py` (in a different terminal)
+    `python3 client.py` (in a different terminal)   
+        If the client and server are on the same machine, use `localhost` or `127.0.0.1` for the address prompt.
 The server must be started before the client.
 
 Use CTRL-C on any side to exit.
